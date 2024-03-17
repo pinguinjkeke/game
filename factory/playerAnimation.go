@@ -17,7 +17,7 @@ func CreatePlayerAnimation(ecs *ecs.ECS) {
 	g32 := ganim8.NewGrid(component.PlayerFrameWidth, component.PlayerFrameHeight, component.PlayerFrameWidth*16, component.PlayerFrameHeight*11)
 	animationDuration := component.PlayerAnimationTickMs * time.Millisecond
 	animations := []*ganim8.Animation{
-		component.PlayerStandingAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("1-16", 8, "1-16", 9, "1-16", 10, "1-2", 11), 250*time.Millisecond),
+		component.PlayerStandingAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("1-16", 8, "1-16", 9, "1-16", 10, "1-2", 11), 150*time.Millisecond),
 		component.PlayerWalkAnimation:     ganim8.New(assets.PlayerSprite, g32.Frames("1-8", 1), animationDuration),
 		component.PlayerRunAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("1-9", 2), animationDuration, func(anim *ganim8.Animation, loops int) {
 			if loops > 0 {

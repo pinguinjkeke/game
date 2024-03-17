@@ -16,8 +16,10 @@ import (
 )
 
 const (
-	WindowHeight  = 480
 	WindowWidth   = 640
+	WindowHeight  = 480
+	LevelHeight   = 480
+	LevelWidth    = WindowWidth * 10
 	WallThickness = 4
 )
 
@@ -51,27 +53,36 @@ func main() {
 
 	ecs.AddSystem(system.UpdateTimer)
 	ecs.AddSystem(system.UpdateSpace)
+	ecs.AddSystem(system.UpdateBuildings)
 	ecs.AddSystem(system.UpdatePlayer)
 	ecs.AddSystem(system.UpdatePlayerAnimation)
+	ecs.AddSystem(system.UpdateCamera)
 
-	ecs.AddRenderer(layers.Default, renderer.RenderWall)
-	ecs.AddRenderer(layers.Default, renderer.RenderPlayer)
+	ecs.AddRenderer(layers.CameraClear, renderer.RenderCameraClear)
+	ecs.AddRenderer(layers.Background, renderer.RenderBuildings)
+	ecs.AddRenderer(layers.Game, renderer.RenderWall)
+	ecs.AddRenderer(layers.Game, renderer.RenderPlayer)
+	ecs.AddRenderer(layers.Camera, renderer.RenderCamera)
+
+	factory.CreateCamera(ecs, WindowWidth, WindowHeight)
 
 	factory.CreateControls(ecs)
-	space := factory.CreateSpace(ecs, WindowWidth, WindowHeight)
+	space := factory.CreateSpace(ecs, LevelWidth, LevelHeight)
 
 	factory.CreateTimer(ecs)
 
 	physics.Add(
 		space,
-		factory.CreateWall(ecs, 0, 0, WallThickness, WindowHeight),
-		factory.CreateWall(ecs, WindowWidth-WallThickness, 0, WallThickness, WindowHeight),
-		factory.CreateWall(ecs, 0, 0, WindowWidth, WallThickness),
-		factory.CreateWall(ecs, 0, WindowHeight-WallThickness*4, WindowWidth, WallThickness*4),
-		factory.CreatePlayer(ecs, WindowWidth/2, WindowHeight/2),
+		factory.CreateWall(ecs, 0, 0, WallThickness, LevelHeight),
+		factory.CreateWall(ecs, LevelWidth-WallThickness, 0, WallThickness, LevelHeight),
+		factory.CreateWall(ecs, 0, 0, LevelWidth, WallThickness),
+		factory.CreateWall(ecs, 0, LevelHeight-WallThickness*4, LevelWidth, WallThickness*4),
+		factory.CreatePlayer(ecs, WindowWidth/2, LevelHeight/2),
 	)
 
 	factory.CreatePlayerAnimation(ecs)
+
+	factory.CreateBuildings(ecs, LevelWidth, LevelHeight)
 
 	game := &Game{ecs}
 

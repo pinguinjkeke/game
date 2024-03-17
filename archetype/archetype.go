@@ -19,7 +19,7 @@ func newArchetype(components ...donburi.IComponentType) *archetype {
 func (a *archetype) Spawn(ecs *ecs.ECS, components ...donburi.IComponentType) *donburi.Entry {
 	return ecs.World.Entry(
 		ecs.Create(
-			layers.Default,
+			layers.Game,
 			append(a.components, components...)...,
 		),
 	)

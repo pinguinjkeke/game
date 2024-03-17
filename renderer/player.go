@@ -12,10 +12,14 @@ func RenderPlayer(ecs *ecs.ECS, screen *ebiten.Image) {
 	player := component.Player.Get(playerEntry)
 	animations := component.Animation.Get(playerEntry)
 	object := component.Object.Get(playerEntry)
+	cameraEntry := component.Camera.MustFirst(ecs.World)
+	camera := component.Camera.Get(cameraEntry)
 
-	op := &ganim8.DrawOptions{
-		X:       object.Position.X + component.PlayerFrameWidth/4,
-		Y:       object.Position.Y + component.PlayerFrameHeight/2,
+	playerImage := ebiten.NewImage(component.PlayerFrameWidth, component.PlayerFrameHeight)
+
+	animationOptions := &ganim8.DrawOptions{
+		X:       component.PlayerFrameWidth / 2,
+		Y:       component.PlayerFrameHeight / 2,
 		ScaleX:  1,
 		ScaleY:  1,
 		OriginX: 0.5,
@@ -23,8 +27,12 @@ func RenderPlayer(ecs *ecs.ECS, screen *ebiten.Image) {
 	}
 
 	if player.MovingDirection < 0 {
-		op.ScaleX = -1
+		animationOptions.ScaleX = -1
 	}
 
-	animations.GetActive().Draw(screen, op)
+	animations.GetActive().Draw(playerImage, animationOptions)
+
+	imageOptions := &ebiten.DrawImageOptions{}
+	camera.GetTranslation(imageOptions, object.Position.X-component.PlayerFrameWidth/4, object.Position.Y)
+	camera.Surface.DrawImage(playerImage, imageOptions)
 }
