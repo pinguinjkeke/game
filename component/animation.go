@@ -19,18 +19,26 @@ func (a *AnimationData) Activate(animation int) *ganim8.Animation {
 }
 
 func (a *AnimationData) ActivateAndResume(animation int) *ganim8.Animation {
-	a.Animations[animation].Resume()
+	a.Resume(animation)
 	a.Active = animation
 
 	return a.Animations[animation]
+}
+
+func (a *AnimationData) Resume(animations ...int) {
+	for _, animation := range animations {
+		a.Animations[animation].Resume()
+	}
 }
 
 func (a *AnimationData) GetActive() *ganim8.Animation {
 	return a.Animations[a.Active]
 }
 
-func (a *AnimationData) PauseAtStart(animation int) {
-	a.Animations[animation].PauseAtStart()
+func (a *AnimationData) PauseAtStart(animations ...int) {
+	for _, animation := range animations {
+		a.Animations[animation].PauseAtStart()
+	}
 }
 
 func (a *AnimationData) CancelStandingTimer() {

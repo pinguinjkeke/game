@@ -18,16 +18,19 @@ const (
 	PlayerStopRunAnimation
 	PlayerJumpAnimation
 	PlayerFallAnimation
+	PlayerRunningJumpAnimation
+	PlayerRunningFallAnimation
 )
 
 type PlayerData struct {
-	Ground          *resolv.Object
-	Jumping         bool
-	DoubleJumping   bool
-	MovingDirection float64
-	Running         bool
-	SpeedX          float64
-	SpeedY          float64
+	Ground             *resolv.Object
+	Jumping            bool
+	DoubleJumping      bool
+	MovingDirection    float64
+	Running            bool
+	JustStoppedRunning bool
+	SpeedX             float64
+	SpeedY             float64
 }
 
 var Player = donburi.NewComponentType[PlayerData]()

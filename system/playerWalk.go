@@ -9,7 +9,6 @@ import (
 	"math"
 )
 
-// TODO fix start and end running animations
 func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 	player := component.Player.Get(playerEntry)
 	playerObject := component.Object.Get(playerEntry)
@@ -18,6 +17,7 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 	acceleration, maxSpeed := physics.Acceleration, physics.MaxRunningSpeed
 
 	player.Running = false
+	player.JustStoppedRunning = playerControls.ActionIsJustReleased(controls.Run)
 
 	if playerControls.ActionIsPressed(controls.Run) {
 		player.Running = true

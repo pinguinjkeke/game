@@ -27,8 +27,12 @@ func UpdatePlayerAnimation(ecs *ecs.ECS) {
 		return
 	}
 
-	animations.PauseAtStart(component.PlayerJumpAnimation)
-	animations.PauseAtStart(component.PlayerFallAnimation)
+	animations.PauseAtStart(
+		component.PlayerJumpAnimation,
+		component.PlayerFallAnimation,
+		component.PlayerRunningJumpAnimation,
+		component.PlayerRunningFallAnimation,
+	)
 
 	if speed != 0 {
 		move(animations, player)
@@ -39,11 +43,22 @@ func UpdatePlayerAnimation(ecs *ecs.ECS) {
 
 func jump(animations *component.AnimationData, player *component.PlayerData) {
 	animations.CancelStandingTimer()
+	running := math.Abs(player.SpeedX) > physics.MaxWalkingSpeed
 
 	if player.SpeedY < 0 {
-		animations.ActivateAndResume(component.PlayerJumpAnimation)
+		animations.Resume(component.PlayerJumpAnimation, component.PlayerRunningJumpAnimation)
+		animations.Active = component.PlayerJumpAnimation
+
+		if running {
+			animations.Active = component.PlayerRunningJumpAnimation
+		}
 	} else {
-		animations.ActivateAndResume(component.PlayerFallAnimation)
+		animations.Resume(component.PlayerFallAnimation, component.PlayerRunningFallAnimation)
+		animations.Active = component.PlayerFallAnimation
+
+		if running {
+			animations.Active = component.PlayerRunningFallAnimation
+		}
 	}
 }
 
@@ -63,19 +78,16 @@ func move(animations *component.AnimationData, player *component.PlayerData) {
 	animations.CancelStandingTimer()
 
 	speed := math.Abs(player.SpeedX)
-	speedDelta := physics.MaxRunningSpeed - physics.MaxWalkingSpeed
 
 	if speed > physics.MaxWalkingSpeed {
-		animation := animations.ActivateAndResume(component.PlayerRunAnimation)
+		animations.ActivateAndResume(component.PlayerRunAnimation)
 
 		if !player.Running {
-			animation = animations.ActivateAndResume(component.PlayerStopRunAnimation)
+			animations.ActivateAndResume(component.PlayerStopRunAnimation)
 		}
 
-		if speed < physics.MaxRunningSpeed-speedDelta/4 {
-			animation.GoToFrame(2)
-		} else if speed < physics.MaxRunningSpeed-speedDelta/2 {
-			animation.GoToFrame(1)
+		if player.JustStoppedRunning {
+			animations.PauseAtStart(component.PlayerStopRunAnimation)
 		}
 	} else {
 		animations.ActivateAndResume(component.PlayerWalkAnimation)
