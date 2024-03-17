@@ -51,7 +51,7 @@ func RenderBuildings(ecs *ecs.ECS, screen *ebiten.Image) {
 		startX := building.X - parallaxOffset
 		cameraMinX, cameraMaxX := cameraStartX-parallaxOffset, int(cameraEndX+parallaxOffset)
 
-		if cameraMinX > startX+parallaxOffset || cameraMaxX < startX+building.Width {
+		if cameraMinX > startX+parallaxOffset || cameraMaxX-parallaxOffset < startX {
 			continue
 		}
 
