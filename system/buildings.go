@@ -21,7 +21,7 @@ func UpdateBuildings(ecs *ecs.ECS) {
 	buildings.Timer = timer.After(3*time.Second, func() {
 		for _, building := range buildings.Buildings {
 			for i := 0; i < 3; i++ {
-				building.Windows[rand.Intn(len(building.Windows))].Light = rand.Intn(2) == 1
+				building.WindowLights[rand.Intn(len(building.WindowLights))] = rand.Intn(2) == 1
 			}
 		}
 	})

@@ -12,14 +12,18 @@ type BuildingWindowData struct {
 }
 
 type BuildingData struct {
-	X            int
-	Y            int
-	Width        int
-	Height       int
-	WindowWidth  int
-	WindowHeight int
-	Windows      []*BuildingWindowData
-	Layer        int
+	X             int
+	Y             int
+	Width         int
+	Height        int
+	WindowWidth   int
+	WindowHeight  int
+	WindowRows    int
+	WindowColumns int
+	WindowOffsetX int
+	WindowOffsetY int
+	WindowLights  []bool
+	Layer         int
 }
 
 type BuildingsData struct {

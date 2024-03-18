@@ -26,53 +26,29 @@ var lightsOffColors = []color.Color{
 	color.RGBA{R: 0x1E, G: 0x25, B: 0x2E, A: 0xff},
 }
 
+var parallaxes = [...]float64{0.95, 1.0}
+
 func RenderBuildings(ecs *ecs.ECS, screen *ebiten.Image) {
 	cameraEntry := component.Camera.MustFirst(ecs.World)
 	camera := component.Camera.Get(cameraEntry)
 
-	layers := [2]*ebiten.Image{
+	layers := [...]*ebiten.Image{
 		ebiten.NewImage(camera.Width, camera.Height),
 		ebiten.NewImage(camera.Width, camera.Height),
 	}
 	imageOptions := &ebiten.DrawImageOptions{}
 
-	cameraStartX, cameraEndX := int(camera.X), int(camera.X)+camera.Width
-
 	buildingsEntry := component.Buildings.MustFirst(ecs.World)
 	buildings := component.Buildings.Get(buildingsEntry)
 
 	for _, building := range buildings.Buildings {
-		parallax := 1.0
-		if building.Layer == 0 {
-			parallax = 0.95
-		}
-		parallaxOffset := int(camera.X * parallax)
+		parallax := parallaxes[building.Layer]
+		startX := int(float64(building.X) - camera.X*parallax)
 
-		startX := building.X - parallaxOffset
-		cameraMinX, cameraMaxX := cameraStartX-parallaxOffset, int(cameraEndX+parallaxOffset)
-
-		if cameraMinX > startX+parallaxOffset || cameraMaxX-parallaxOffset < startX {
+		if startX+building.Width < 0 || startX > camera.Width {
 			continue
 		}
 
-		vector.DrawFilledRect(
-			layers[building.Layer],
-			float32(startX),
-			float32(building.Y)-borderWidth,
-			float32(building.Width),
-			borderWidth,
-			borderColor,
-			false,
-		)
-		vector.DrawFilledRect(
-			layers[building.Layer],
-			float32(startX+building.Width),
-			float32(building.Y)-borderWidth,
-			borderWidth,
-			float32(building.Height),
-			borderColor,
-			false,
-		)
 		vector.DrawFilledRect(
 			layers[building.Layer],
 			float32(startX),
@@ -83,22 +59,95 @@ func RenderBuildings(ecs *ecs.ECS, screen *ebiten.Image) {
 			false,
 		)
 
-		for _, window := range building.Windows {
-			windowColor := lightsOnColors[building.Layer]
+		vector.DrawFilledRect(
+			layers[building.Layer],
+			float32(startX),
+			float32(building.Y)-borderWidth,
+			float32(building.Width),
+			borderWidth,
+			borderColor,
+			false,
+		)
 
-			if !window.Light {
-				windowColor = lightsOffColors[building.Layer]
+		if startX+building.Width <= camera.Width {
+			vector.DrawFilledRect(
+				layers[building.Layer],
+				float32(startX+building.Width),
+				float32(building.Y)-borderWidth,
+				borderWidth,
+				float32(building.Height),
+				borderColor,
+				false,
+			)
+		}
+
+		vector.DrawFilledRect(
+			layers[building.Layer],
+			float32(startX+building.WindowOffsetX),
+			float32(building.Y+building.WindowOffsetY),
+			float32(building.Width-building.WindowOffsetX*2),
+			float32(building.Height-building.WindowOffsetY*2),
+			lightsOnColors[building.Layer],
+			false,
+		)
+
+		for i := building.WindowWidth + building.WindowOffsetX; i < building.Width; i += building.WindowWidth {
+			if startX+i > camera.Width {
+				continue
 			}
 
 			vector.DrawFilledRect(
 				layers[building.Layer],
-				float32(startX+window.X),
-				float32(building.Y+window.Y),
-				float32(building.WindowWidth),
-				float32(building.WindowHeight),
-				windowColor,
+				float32(startX+i),
+				float32(building.Y+building.WindowOffsetY),
+				float32(building.WindowOffsetX),
+				float32(building.Height-building.WindowOffsetY*2),
+				buildingColors[building.Layer],
 				false,
 			)
+
+			i += building.WindowOffsetX
+		}
+
+		for i := building.WindowHeight + building.WindowOffsetY; i < building.Height; i += building.WindowHeight {
+			vector.DrawFilledRect(
+				layers[building.Layer],
+				float32(startX+building.WindowOffsetX),
+				float32(building.Y+i),
+				float32(building.Width-building.WindowOffsetX*2),
+				float32(building.WindowOffsetY),
+				buildingColors[building.Layer],
+				false,
+			)
+
+			i += building.WindowOffsetY
+		}
+
+		window := 0
+
+		for i := 0; i < building.WindowRows; i++ {
+			for j := 0; j < building.WindowColumns; j++ {
+				windowX := (building.WindowOffsetX * (i + 1)) + building.WindowWidth*i
+
+				if building.WindowLights[window] || startX+windowX > camera.Width {
+					window++
+					continue
+				}
+
+				windowY := (building.WindowOffsetY * (j + 1)) + building.WindowHeight*j
+
+				vector.DrawFilledRect(
+					layers[building.Layer],
+					float32(startX+windowX),
+					float32(building.Y+windowY),
+					float32(building.WindowWidth),
+					float32(building.WindowHeight),
+					lightsOffColors[building.Layer],
+					false,
+				)
+
+				window++
+			}
 		}
 	}
 

@@ -41,30 +41,30 @@ func CreateBuildings(ecs *ecs.ECS, levelWidth, levelHeight float64) {
 		}
 
 		windowRows, windowColumns := int((width-windowOffsetX)/(windowWidth+windowOffsetX)), int((height-windowOffsetY)/(windowHeight+windowOffsetY))
-		windows := make([]*component.BuildingWindowData, windowRows*windowColumns)
+		windowLights := make([]bool, windowRows*windowColumns)
 		currentWindow := 0
 
 		for i := 0; i < windowRows; i++ {
 			for j := 0; j < windowColumns; j++ {
-				windows[currentWindow] = &component.BuildingWindowData{
-					X:     windowOffsetX + (windowWidth+windowOffsetX)*i,
-					Y:     windowOffsetY + (windowHeight+windowOffsetY)*j,
-					Light: rand.Intn(4) != 1,
-				}
+				windowLights[currentWindow] = rand.Intn(4) != 1
 
 				currentWindow++
 			}
 		}
 
 		buildings[i] = &component.BuildingData{
-			X:            x,
-			Y:            y,
-			Width:        width,
-			Height:       height,
-			WindowWidth:  windowWidth,
-			WindowHeight: windowHeight,
-			Windows:      windows,
-			Layer:        rand.Intn(2),
+			X:             x,
+			Y:             y,
+			Width:         width,
+			Height:        height,
+			WindowWidth:   windowWidth,
+			WindowHeight:  windowHeight,
+			WindowRows:    windowRows,
+			WindowColumns: windowColumns,
+			WindowOffsetX: windowOffsetX,
+			WindowOffsetY: windowOffsetY,
+			WindowLights:  windowLights,
+			Layer:         rand.Intn(2),
 		}
 
 		offset += minBuildingWidth
