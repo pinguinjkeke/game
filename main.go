@@ -18,7 +18,7 @@ import (
 const (
 	WindowWidth   = 640
 	WindowHeight  = 480
-	LevelHeight   = 480
+	LevelHeight   = WindowHeight
 	LevelWidth    = WindowWidth * 10
 	WallThickness = 4
 )
@@ -59,7 +59,7 @@ func main() {
 	ecs.AddSystem(system.UpdateCamera)
 
 	ecs.AddRenderer(layers.CameraClear, renderer.RenderCameraClear)
-	ecs.AddRenderer(layers.Background, renderer.RenderBuildings)
+	ecs.AddRenderer(layers.Background, renderer.RenderBackground)
 	ecs.AddRenderer(layers.Game, renderer.RenderWall)
 	ecs.AddRenderer(layers.Game, renderer.RenderPlayer)
 	ecs.AddRenderer(layers.Camera, renderer.RenderCamera)
@@ -83,6 +83,7 @@ func main() {
 	factory.CreatePlayerAnimation(ecs)
 
 	factory.CreateBuildings(ecs, LevelWidth, LevelHeight)
+	factory.CreateSky(ecs, LevelWidth, WindowWidth)
 
 	game := &Game{ecs}
 

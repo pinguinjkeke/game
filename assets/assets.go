@@ -21,7 +21,9 @@ var Music_mp3 []byte
 
 var ScoreFont = mustLoadFont("font.ttf")
 
-var PlayerSprite = mustLoadImage("player/player.png")
+var PlayerSprite = mustLoadImage("player.png")
+var CloudsSprite = mustLoadImage("clouds.png")
+var MoonSprite = mustLoadImage("moon.png")
 var EnemySprite = mustLoadImage("enemy.png")
 var WorldSprite = mustLoadImage("floor.png")
 
