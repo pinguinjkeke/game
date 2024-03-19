@@ -60,6 +60,7 @@ func renderBuildings(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camer
 
 		options := &ebiten.DrawImageOptions{}
 		options.GeoM.Translate(startX, float64(layers[building.Layer].Bounds().Dy()-building.Sprite.Bounds().Dy()))
+		options.Filter = ebiten.FilterLinear
 		layers[building.Layer].DrawImage(building.Sprite, options)
 	}
 }
