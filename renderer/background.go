@@ -10,8 +10,8 @@ import (
 
 const BackgroundSize = 225
 
-var buildingParallaxes = [...]float64{0.03, 0.05}
-var cloudParallaxes = [...]float64{0.001, 0.003}
+var buildingParallaxes = [...]float64{0.04, 0.06}
+var cloudParallaxes = [...]float64{0.002, 0.004}
 
 func RenderBackground(ecs *ecs.ECS, screen *ebiten.Image) {
 	cameraEntry := component.Camera.MustFirst(ecs.World)
@@ -26,9 +26,9 @@ func RenderBackground(ecs *ecs.ECS, screen *ebiten.Image) {
 	options.GeoM.Scale(float64(camera.Surface.Bounds().Dx()), 1)
 	layers[0].DrawImage(assets.SkySprite, options)
 
+	renderMoon(ecs, layers[0], camera)
 	renderBuildings(ecs, layers, camera)
 	renderClouds(ecs, layers, camera)
-	renderMoon(ecs, layers[0], camera)
 
 	for _, layer := range layers {
 		camera.Surface.DrawImage(layer, &ebiten.DrawImageOptions{})
