@@ -4,49 +4,34 @@ import (
 	"game/assets"
 	"game/component"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	camera "github.com/melonfunction/ebiten-camera"
 	"github.com/yohamta/donburi/ecs"
-	"image/color"
 )
 
-const borderWidth = 2
+const BackgroundSize = 225
 
-var borderColor = color.RGBA{R: 0x42, G: 0x4D, B: 0x5A, A: 0xff}
-
-var buildingColors = []color.Color{
-	color.RGBA{R: 0x27, G: 0x31, B: 0x3E, A: 0xff},
-	color.RGBA{R: 0x32, G: 0x3E, B: 0x4F, A: 0xff},
-}
-
-var lightsOnColors = []color.Color{
-	color.RGBA{R: 0xAE, G: 0xB3, B: 0x76, A: 0xff},
-	color.RGBA{R: 0xF8, G: 0xFF, B: 0xA9, A: 0xff},
-}
-var lightsOffColors = []color.Color{
-	color.RGBA{R: 0x18, G: 0x1F, B: 0x27, A: 0xff},
-	color.RGBA{R: 0x1E, G: 0x25, B: 0x2E, A: 0xff},
-}
-
-var buildingParallaxes = [...]float64{0.95, 1.0}
-var cloudParallaxes = [...]float64{0.08, 0.13}
+var buildingParallaxes = [...]float64{0.03, 0.05}
+var cloudParallaxes = [...]float64{0.001, 0.003}
 
 func RenderBackground(ecs *ecs.ECS, screen *ebiten.Image) {
 	cameraEntry := component.Camera.MustFirst(ecs.World)
 	camera := component.Camera.Get(cameraEntry)
 
 	layers := [...]*ebiten.Image{
-		ebiten.NewImage(camera.Width, camera.Height),
-		ebiten.NewImage(camera.Width, camera.Height),
+		ebiten.NewImage(camera.Width, BackgroundSize),
+		ebiten.NewImage(camera.Width, BackgroundSize),
 	}
-	imageOptions := &ebiten.DrawImageOptions{}
+
+	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Scale(float64(camera.Surface.Bounds().Dx()), 1)
+	layers[0].DrawImage(assets.SkySprite, options)
 
 	renderBuildings(ecs, layers, camera)
 	renderClouds(ecs, layers, camera)
 	renderMoon(ecs, layers[0], camera)
 
 	for _, layer := range layers {
-		camera.Surface.DrawImage(layer, imageOptions)
+		camera.Surface.DrawImage(layer, &ebiten.DrawImageOptions{})
 	}
 }
 
@@ -67,112 +52,15 @@ func renderBuildings(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camer
 
 	for _, building := range buildings.Buildings {
 		parallax := buildingParallaxes[building.Layer]
-		startX := int(float64(building.X) - camera.X*parallax)
+		startX := building.X - camera.X*parallax
 
-		if startX+building.Width < 0 || startX > camera.Width {
+		if startX+float64(building.Sprite.Bounds().Dx()) < 0 || startX > float64(camera.Width) {
 			continue
 		}
 
-		vector.DrawFilledRect(
-			layers[building.Layer],
-			float32(startX),
-			float32(building.Y),
-			float32(building.Width),
-			float32(building.Height+borderWidth),
-			buildingColors[building.Layer],
-			false,
-		)
-
-		vector.DrawFilledRect(
-			layers[building.Layer],
-			float32(startX),
-			float32(building.Y)-borderWidth,
-			float32(building.Width),
-			borderWidth,
-			borderColor,
-			false,
-		)
-
-		if startX+building.Width <= camera.Width {
-			vector.DrawFilledRect(
-				layers[building.Layer],
-				float32(startX+building.Width),
-				float32(building.Y)-borderWidth,
-				borderWidth,
-				float32(building.Height),
-				borderColor,
-				false,
-			)
-		}
-
-		vector.DrawFilledRect(
-			layers[building.Layer],
-			float32(startX+building.WindowOffsetX),
-			float32(building.Y+building.WindowOffsetY),
-			float32(building.Width-building.WindowOffsetX*2),
-			float32(building.Height-building.WindowOffsetY*2),
-			lightsOnColors[building.Layer],
-			false,
-		)
-
-		for i := building.WindowWidth + building.WindowOffsetX; i < building.Width; i += building.WindowWidth {
-			if startX+i > camera.Width {
-				continue
-			}
-
-			vector.DrawFilledRect(
-				layers[building.Layer],
-				float32(startX+i),
-				float32(building.Y+building.WindowOffsetY),
-				float32(building.WindowOffsetX),
-				float32(building.Height-building.WindowOffsetY*2),
-				buildingColors[building.Layer],
-				false,
-			)
-
-			i += building.WindowOffsetX
-		}
-
-		for i := building.WindowHeight + building.WindowOffsetY; i < building.Height; i += building.WindowHeight {
-			vector.DrawFilledRect(
-				layers[building.Layer],
-				float32(startX+building.WindowOffsetX),
-				float32(building.Y+i),
-				float32(building.Width-building.WindowOffsetX*2),
-				float32(building.WindowOffsetY),
-				buildingColors[building.Layer],
-				false,
-			)
-
-			i += building.WindowOffsetY
-		}
-
-		window := 0
-
-		for i := 0; i < building.WindowRows; i++ {
-			for j := 0; j < building.WindowColumns; j++ {
-				windowX := (building.WindowOffsetX * (i + 1)) + building.WindowWidth*i
-
-				if building.WindowLights[window] || startX+windowX > camera.Width {
-					window++
-					continue
-				}
-
-				windowY := (building.WindowOffsetY * (j + 1)) + building.WindowHeight*j
-
-				vector.DrawFilledRect(
-					layers[building.Layer],
-					float32(startX+windowX),
-					float32(building.Y+windowY),
-					float32(building.WindowWidth),
-					float32(building.WindowHeight),
-					lightsOffColors[building.Layer],
-					false,
-				)
-
-				window++
-			}
-		}
+		options := &ebiten.DrawImageOptions{}
+		options.GeoM.Translate(startX, float64(layers[building.Layer].Bounds().Dy()-building.Sprite.Bounds().Dy()))
+		layers[building.Layer].DrawImage(building.Sprite, options)
 	}
 }
 

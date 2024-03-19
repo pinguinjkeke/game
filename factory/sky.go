@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/yohamta/donburi/ecs"
 	"image"
+	math "math"
 	"math/rand"
 )
 
@@ -29,7 +30,7 @@ func CreateSky(ecs *ecs.ECS, levelWidth, windowWidth int) {
 
 	for i, _ := range clouds {
 		clouds[i] = component.CloudData{
-			X:      i*windowOffset + rand.Intn(windowOffset/3),
+			X:      i*windowOffset + rand.Intn(int(math.Min(float64(windowOffset)/3, 1))),
 			Y:      rand.Intn(120),
 			Layer:  rand.Intn(2),
 			Flip:   rand.Intn(2) == 1,

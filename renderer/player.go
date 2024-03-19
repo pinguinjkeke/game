@@ -34,5 +34,5 @@ func RenderPlayer(ecs *ecs.ECS, screen *ebiten.Image) {
 
 	imageOptions := &ebiten.DrawImageOptions{}
 	camera.GetTranslation(imageOptions, object.Position.X-component.PlayerFrameWidth/4, object.Position.Y)
-	camera.Surface.DrawImage(playerImage, imageOptions)
+	screen.DrawImage(playerImage, imageOptions)
 }

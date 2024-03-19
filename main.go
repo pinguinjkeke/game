@@ -1,13 +1,13 @@
 package main
 
 import (
+	"game/component"
 	"game/factory"
 	"game/layers"
 	"game/physics"
 	"game/renderer"
 	"game/system"
 	"github.com/yohamta/donburi/ecs"
-	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -35,9 +35,13 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, "Hello, World!")
-	screen.Fill(color.RGBA{20, 20, 40, 255})
 
-	g.ecs.Draw(screen)
+	cameraEntry := component.Camera.MustFirst(g.ecs.World)
+	camera := component.Camera.Get(cameraEntry)
+
+	camera.Surface.Clear()
+	g.ecs.Draw(camera.Surface)
+	camera.Blit(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -58,11 +62,10 @@ func main() {
 	ecs.AddSystem(system.UpdatePlayerAnimation)
 	ecs.AddSystem(system.UpdateCamera)
 
-	ecs.AddRenderer(layers.CameraClear, renderer.RenderCameraClear)
 	ecs.AddRenderer(layers.Background, renderer.RenderBackground)
+	ecs.AddRenderer(layers.Background, renderer.RenderRoad)
 	ecs.AddRenderer(layers.Game, renderer.RenderWall)
 	ecs.AddRenderer(layers.Game, renderer.RenderPlayer)
-	ecs.AddRenderer(layers.Camera, renderer.RenderCamera)
 
 	factory.CreateCamera(ecs, WindowWidth, WindowHeight)
 
@@ -82,8 +85,9 @@ func main() {
 
 	factory.CreatePlayerAnimation(ecs)
 
-	factory.CreateBuildings(ecs, LevelWidth, LevelHeight)
+	factory.CreateBuildings(ecs, LevelWidth)
 	factory.CreateSky(ecs, LevelWidth, WindowWidth)
+	factory.CreateRoad(ecs)
 
 	game := &Game{ecs}
 

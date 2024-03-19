@@ -1,34 +1,30 @@
 package component
 
 import (
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/solarlune/ebitick"
 	"github.com/yohamta/donburi"
 )
 
-type BuildingWindowData struct {
-	X     int
-	Y     int
-	Light bool
-}
-
-type BuildingData struct {
-	X             int
-	Y             int
-	Width         int
-	Height        int
-	WindowWidth   int
-	WindowHeight  int
-	WindowRows    int
-	WindowColumns int
-	WindowOffsetX int
-	WindowOffsetY int
-	WindowLights  []bool
-	Layer         int
-}
-
 type BuildingsData struct {
 	Buildings []*BuildingData
 	Timer     *ebitick.Timer
+}
+
+type BuildingData struct {
+	X           float64
+	OffsetX     float64
+	OffsetY     float64
+	Layer       int
+	Sprite      *ebiten.Image
+	Windows     []*BuildingWindowData
+	WindowWidth int
+}
+
+type BuildingWindowData struct {
+	X      int
+	Y      int
+	Lights bool
 }
 
 var Buildings = donburi.NewComponentType[BuildingsData]()

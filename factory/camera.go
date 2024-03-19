@@ -7,10 +7,10 @@ import (
 	"github.com/yohamta/donburi/ecs"
 )
 
-func CreateCamera(ecs *ecs.ECS, levelWidth, levelHeight int) {
+func CreateCamera(ecs *ecs.ECS, windowWidth, windowHeight int) {
 	cameraEntry := archetype.Camera.Spawn(ecs)
 
-	ebitenCamera := camera.NewCamera(levelWidth, levelHeight, 0, 0, 0, 1)
+	ebitenCamera := camera.NewCamera(windowWidth, windowHeight, 0, 0, 0, 1)
 
 	component.Camera.Set(cameraEntry, ebitenCamera)
 }

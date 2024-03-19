@@ -3,8 +3,7 @@ package layers
 import "github.com/yohamta/donburi/ecs"
 
 const (
-	CameraClear ecs.LayerID = iota
-	Background
+	Background ecs.LayerID = iota
 	Game
 	Camera
 )

@@ -2,6 +2,7 @@ package system
 
 import (
 	"game/component"
+	"game/factory"
 	"github.com/solarlune/ebitick"
 	"github.com/yohamta/donburi/ecs"
 	"math/rand"
@@ -21,7 +22,15 @@ func UpdateBuildings(ecs *ecs.ECS) {
 	buildings.Timer = timer.After(3*time.Second, func() {
 		for _, building := range buildings.Buildings {
 			for i := 0; i < 3; i++ {
-				building.WindowLights[rand.Intn(len(building.WindowLights))] = rand.Intn(2) == 1
+				window := rand.Intn(len(building.Windows))
+				lights, nextLights := building.Windows[window].Lights, rand.Intn(2) == 1
+
+				if lights == nextLights {
+					continue
+				}
+
+				building.Windows[window].Lights = nextLights
+				factory.RenderLights(building, window)
 			}
 		}
 	})
