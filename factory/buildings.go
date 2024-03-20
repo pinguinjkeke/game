@@ -4,6 +4,7 @@ import (
 	"game/archetype"
 	"game/assets"
 	"game/component"
+	"game/renderer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/yohamta/donburi/ecs"
@@ -23,6 +24,13 @@ const (
 	buildingPaddingY  = 5
 )
 
+type buildingData struct {
+	X           float64
+	Layer       int
+	Sprite      *ebiten.Image
+	WindowWidth int
+}
+
 var buildingColors = []color.Color{
 	color.RGBA{R: 0x23, G: 0x2E, B: 0x32, A: 0xff},
 	color.RGBA{R: 0x30, G: 0x3A, B: 0x43, A: 0xff},
@@ -40,24 +48,44 @@ var lightsOffColors = []color.Color{
 var lampSprite *ebiten.Image
 var antennaSprite *ebiten.Image
 
-func CreateBuildings(ecs *ecs.ECS, levelWidth float64) {
+func CreateBuildings(ecs *ecs.ECS) {
+	cameraEntry := component.Camera.MustFirst(ecs.World)
+	camera := component.Camera.Get(cameraEntry)
+	backgroundWidth := camera.Surface.Bounds().Dx() * 2
+
 	initSprites()
+
+	layers := []*ebiten.Image{
+		ebiten.NewImage(backgroundWidth, renderer.BackgroundSize),
+		ebiten.NewImage(backgroundWidth, renderer.BackgroundSize),
+	}
 
 	buildingsEntry := archetype.Buildings.Spawn(ecs)
 	offset := 0.0
-	buildings := make([]*component.BuildingData, 0, 10)
+	windows := make([]*component.BuildingWindowData, 0, 100)
 
-	for offset < levelWidth {
-		building := createBuilding(offset)
-		buildings = append(buildings, building)
+	for offset < float64(backgroundWidth) {
+		building, buildingWindows := createBuilding(offset)
+		windows = append(windows, buildingWindows...)
+
+		options := &ebiten.DrawImageOptions{}
+		options.GeoM.Translate(building.X, float64(renderer.BackgroundSize-building.Sprite.Bounds().Dy()))
+		layers[building.Layer].DrawImage(building.Sprite, options)
 
 		offset += float64(buildingMarginX*(rand.Intn(8)-3)) + float64(building.Sprite.Bounds().Dx())
 	}
 
-	component.Buildings.Set(buildingsEntry, &component.BuildingsData{Buildings: buildings})
+	for _, window := range windows {
+		RenderWindow(window, layers)
+	}
+
+	component.Buildings.Set(buildingsEntry, &component.BuildingsData{
+		Layers:  layers,
+		Windows: windows,
+	})
 }
 
-func createBuilding(positionX float64) *component.BuildingData {
+func createBuilding(positionX float64) (building *buildingData, windows []*component.BuildingWindowData) {
 	doubledWindow := rand.Intn(4) == 1
 	windowWidth, buildingMarginX := windowSize, windowOffset
 	windowRows := minWindows + rand.Intn(5)
@@ -76,9 +104,10 @@ func createBuilding(positionX float64) *component.BuildingData {
 	buildingSprite := ebiten.NewImage(width, height)
 	buildingSprite.Fill(buildingColors[layer])
 
-	x := buildingMarginX
-	windows := make([]*component.BuildingWindowData, 0, 20)
+	sprite, oX := addLights(buildingSprite)
 
+	windows = make([]*component.BuildingWindowData, 0, 20)
+	x := buildingMarginX
 	for x < width {
 		y := buildingPaddingY
 
@@ -89,9 +118,11 @@ func createBuilding(positionX float64) *component.BuildingData {
 
 			for j := 0; j < windowColumns; j++ {
 				windows = append(windows, &component.BuildingWindowData{
-					X:      x,
-					Y:      y,
+					X:      int(positionX+oX) + x,
+					Y:      renderer.BackgroundSize - height + y,
+					Layer:  layer,
 					Lights: rand.Intn(4) == 1,
+					Width:  windowWidth,
 				})
 
 				y += windowSize + windowOffset
@@ -103,38 +134,28 @@ func createBuilding(positionX float64) *component.BuildingData {
 		x += windowWidth + windowOffset
 	}
 
-	sprite, oX, oY := addLights(buildingSprite)
-
-	buildingData := &component.BuildingData{
+	buildingData := &buildingData{
 		X:           positionX,
-		OffsetX:     oX,
-		OffsetY:     oY,
 		Layer:       layer,
 		Sprite:      sprite,
-		Windows:     windows,
 		WindowWidth: windowWidth,
 	}
 
-	for i := 0; i < len(windows); i++ {
-		RenderLights(buildingData, i)
-	}
-
-	return buildingData
+	return buildingData, windows
 }
 
-func RenderLights(building *component.BuildingData, windowIndex int) {
-	window := building.Windows[windowIndex]
-	color := lightsOnColors[building.Layer]
+func RenderWindow(window *component.BuildingWindowData, layers []*ebiten.Image) {
+	color := lightsOnColors[window.Layer]
 
 	if !window.Lights {
-		color = lightsOffColors[building.Layer]
+		color = lightsOffColors[window.Layer]
 	}
 
 	vector.DrawFilledRect(
-		building.Sprite,
-		float32(building.OffsetX+float64(window.X)),
-		float32(building.OffsetY+float64(window.Y)),
-		float32(building.WindowWidth),
+		layers[window.Layer],
+		float32(window.X),
+		float32(window.Y),
+		float32(window.Width),
 		float32(windowSize),
 		color,
 		false,
@@ -142,26 +163,26 @@ func RenderLights(building *component.BuildingData, windowIndex int) {
 
 	if window.Lights {
 		vector.DrawFilledRect(
-			building.Sprite,
-			float32(building.OffsetX+float64(window.X+building.WindowWidth-1)),
-			float32(building.OffsetY+float64(window.Y+windowSize-1)),
+			layers[window.Layer],
+			float32(window.X+window.Width-1),
+			float32(window.Y-1),
 			1,
 			1,
-			lightsOffColors[building.Layer],
+			lightsOffColors[window.Layer],
 			false,
 		)
 	}
 }
 
-func addLights(image *ebiten.Image) (newImage *ebiten.Image, oX, oY float64) {
-	oX, oY = float64(lampSprite.Bounds().Dx()), 2.0
-	drawCrane := rand.Intn(15) == 0
+func addLights(image *ebiten.Image) (newImage *ebiten.Image, oX float64) {
+	oX, oY := float64(lampSprite.Bounds().Dx()), 2.0
+	drawCrane := rand.Intn(10) == 0
 	drawAntenna := false
 
 	if drawCrane {
 		scaleFactor := float64(image.Bounds().Dx()) / float64(assets.CraneSprite.Bounds().Dx())
 		oX, oY = 0, float64(assets.CraneSprite.Bounds().Dy())*scaleFactor
-	} else if !drawCrane && rand.Intn(10) == 0 {
+	} else if !drawCrane && rand.Intn(5) == 0 {
 		drawAntenna = true
 		oY = float64(antennaSprite.Bounds().Dy())
 	}
@@ -178,7 +199,7 @@ func addLights(image *ebiten.Image) (newImage *ebiten.Image, oX, oY float64) {
 		newImage.DrawImage(assets.CraneSprite, options)
 	} else if drawAntenna {
 		options := &ebiten.DrawImageOptions{}
-		options.GeoM.Translate(float64(image.Bounds().Dx()/2-2), 0)
+		options.GeoM.Translate(float64(image.Bounds().Dx()/2), 0)
 		newImage.DrawImage(antennaSprite, options)
 	}
 
@@ -194,7 +215,7 @@ func addLights(image *ebiten.Image) (newImage *ebiten.Image, oX, oY float64) {
 		newImage.DrawImage(lampSprite, options)
 	}
 
-	return newImage, oX, oY
+	return newImage, oX
 }
 
 func initSprites() {

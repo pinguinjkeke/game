@@ -17,15 +17,14 @@ func RenderBackground(ecs *ecs.ECS, screen *ebiten.Image) {
 	cameraEntry := component.Camera.MustFirst(ecs.World)
 	camera := component.Camera.Get(cameraEntry)
 
-	layers := [...]*ebiten.Image{
-		ebiten.NewImage(camera.Width, BackgroundSize),
-		ebiten.NewImage(camera.Width, BackgroundSize),
+	layers := [2]*ebiten.Image{
+		ebiten.NewImage(camera.Surface.Bounds().Dx(), camera.Surface.Bounds().Dy()),
+		ebiten.NewImage(camera.Surface.Bounds().Dx(), camera.Surface.Bounds().Dy()),
 	}
 
 	options := &ebiten.DrawImageOptions{}
 	options.GeoM.Scale(float64(camera.Surface.Bounds().Dx()), 1)
 	layers[0].DrawImage(assets.SkySprite, options)
-
 	renderMoon(ecs, layers[0], camera)
 	renderBuildings(ecs, layers, camera)
 	renderClouds(ecs, layers, camera)
@@ -50,19 +49,11 @@ func renderBuildings(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camer
 	buildingsEntry := component.Buildings.MustFirst(ecs.World)
 	buildings := component.Buildings.Get(buildingsEntry)
 
-	for _, building := range buildings.Buildings {
-		parallax := buildingParallaxes[building.Layer]
-		startX := building.X - camera.X*parallax
-
-		if startX+float64(building.Sprite.Bounds().Dx()) < 0 || startX > float64(camera.Width) {
-			continue
-		}
-
-		options := &ebiten.DrawImageOptions{}
-		options.GeoM.Translate(startX, float64(layers[building.Layer].Bounds().Dy()-building.Sprite.Bounds().Dy()))
-		options.Filter = ebiten.FilterLinear
-		layers[building.Layer].DrawImage(building.Sprite, options)
-	}
+	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Translate(-camera.X*0.1, 0)
+	layers[0].DrawImage(buildings.Layers[0], options)
+	options.GeoM.Translate(-camera.X*0.02, 0)
+	layers[1].DrawImage(buildings.Layers[1], options)
 }
 
 func renderClouds(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camera) {

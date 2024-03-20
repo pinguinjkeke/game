@@ -85,7 +85,7 @@ func main() {
 
 	factory.CreatePlayerAnimation(ecs)
 
-	factory.CreateBuildings(ecs, LevelWidth)
+	factory.CreateBuildings(ecs)
 	factory.CreateSky(ecs, LevelWidth, WindowWidth)
 	factory.CreateRoad(ecs)
 

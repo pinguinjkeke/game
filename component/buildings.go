@@ -7,23 +7,16 @@ import (
 )
 
 type BuildingsData struct {
-	Buildings []*BuildingData
-	Timer     *ebitick.Timer
-}
-
-type BuildingData struct {
-	X           float64
-	OffsetX     float64
-	OffsetY     float64
-	Layer       int
-	Sprite      *ebiten.Image
-	Windows     []*BuildingWindowData
-	WindowWidth int
+	Timer   *ebitick.Timer
+	Layers  []*ebiten.Image
+	Windows []*BuildingWindowData
 }
 
 type BuildingWindowData struct {
 	X      int
 	Y      int
+	Width  int
+	Layer  int
 	Lights bool
 }
 

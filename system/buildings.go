@@ -20,18 +20,16 @@ func UpdateBuildings(ecs *ecs.ECS) {
 	}
 
 	buildings.Timer = timer.After(3*time.Second, func() {
-		for _, building := range buildings.Buildings {
-			for i := 0; i < 3; i++ {
-				window := rand.Intn(len(building.Windows))
-				lights, nextLights := building.Windows[window].Lights, rand.Intn(2) == 1
+		for i := 0; i < 30; i++ {
+			window := rand.Intn(len(buildings.Windows))
+			lights, nextLights := buildings.Windows[window].Lights, rand.Intn(2) == 1
 
-				if lights == nextLights {
-					continue
-				}
-
-				building.Windows[window].Lights = nextLights
-				factory.RenderLights(building, window)
+			if lights == nextLights {
+				continue
 			}
+
+			buildings.Windows[window].Lights = nextLights
+			factory.RenderWindow(buildings.Windows[window], buildings.Layers)
 		}
 	})
 }
