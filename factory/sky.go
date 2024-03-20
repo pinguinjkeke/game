@@ -4,43 +4,52 @@ import (
 	"game/archetype"
 	"game/assets"
 	"game/component"
+	"game/renderer"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/yohamta/donburi/ecs"
 	"image"
-	math "math"
 	"math/rand"
 )
 
 const cloudStep = 64
 
 var sprites = [...]*ebiten.Image{
-	assets.CloudsSprite.SubImage(image.Rect(0, 0, cloudStep*7, cloudStep*2)).(*ebiten.Image),
-	assets.CloudsSprite.SubImage(image.Rect(cloudStep*7, 0, cloudStep*11, cloudStep*2)).(*ebiten.Image),
-	assets.CloudsSprite.SubImage(image.Rect(cloudStep*11, 0, cloudStep*17, cloudStep*2)).(*ebiten.Image),
-	assets.CloudsSprite.SubImage(image.Rect(cloudStep*17, 0, cloudStep*21, cloudStep*2)).(*ebiten.Image),
-	assets.CloudsSprite.SubImage(image.Rect(cloudStep*21, 0, cloudStep*23, cloudStep*2)).(*ebiten.Image),
+	assets.CloudsSprite.SubImage(image.Rect(0, 0, cloudStep*2, cloudStep)).(*ebiten.Image),
+	assets.CloudsSprite.SubImage(image.Rect(cloudStep*2, 0, cloudStep*2, cloudStep)).(*ebiten.Image),
+	assets.CloudsSprite.SubImage(image.Rect(cloudStep*4, 0, cloudStep*2, cloudStep)).(*ebiten.Image),
+	assets.CloudsSprite.SubImage(image.Rect(cloudStep*6, 0, cloudStep*2, cloudStep)).(*ebiten.Image),
 }
 
-func CreateSky(ecs *ecs.ECS, levelWidth, windowWidth int) {
+func CreateSky(ecs *ecs.ECS) {
 	skyEntry := archetype.Sky.Spawn(ecs)
 
-	cloudsPerWindow := float64(levelWidth/windowWidth) * 0.15
-	clouds := make([]component.CloudData, int(cloudsPerWindow*2.0/(rand.Float64()/2)))
-	windowOffset := windowWidth / len(clouds)
+	cameraEntry := component.Camera.MustFirst(ecs.World)
+	camera := component.Camera.Get(cameraEntry)
+	windowWidth := camera.Surface.Bounds().Dx()
+	backgroundWidth := windowWidth * 2
 
-	for i, _ := range clouds {
-		clouds[i] = component.CloudData{
-			X:      i*windowOffset + rand.Intn(int(math.Min(float64(windowOffset)/3, 1))),
-			Y:      rand.Intn(120),
-			Layer:  rand.Intn(2),
-			Flip:   rand.Intn(2) == 1,
-			Sprite: sprites[rand.Intn(len(sprites))],
+	layers := []*ebiten.Image{
+		ebiten.NewImage(backgroundWidth, renderer.BackgroundSize),
+		ebiten.NewImage(backgroundWidth, renderer.BackgroundSize),
+	}
+
+	cloudOffset, offset, options := windowWidth/4, 0, &ebiten.DrawImageOptions{}
+
+	for offset <= backgroundWidth {
+		options.GeoM.Reset()
+		options.GeoM.Translate(float64(offset), float64(rand.Intn(renderer.BackgroundSize/3)))
+
+		if rand.Intn(3) == 1 {
+			//options.GeoM.Scale(-1, 1)
 		}
+
+		layers[rand.Intn(2)].DrawImage(sprites[rand.Intn(len(sprites))], options)
+		offset += cloudOffset - (rand.Intn(cloudOffset/4) + cloudOffset/4)
 	}
 
 	component.Sky.Set(skyEntry, &component.SkyData{
-		Clouds: clouds,
-		MoonX:  windowWidth - 60,
-		MoonY:  40,
+		Layers: layers,
+		MoonX:  windowWidth - 40,
+		MoonY:  20,
 	})
 }

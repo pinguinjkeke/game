@@ -6,17 +6,9 @@ import (
 )
 
 type SkyData struct {
-	Clouds []CloudData
+	Layers []*ebiten.Image
 	MoonX  int
 	MoonY  int
-}
-
-type CloudData struct {
-	X      int
-	Y      int
-	Layer  int
-	Flip   bool
-	Sprite *ebiten.Image
 }
 
 var Sky = donburi.NewComponentType[SkyData]()
