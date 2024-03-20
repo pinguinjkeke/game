@@ -24,6 +24,8 @@ func UpdatePlayerAnimation(ecs *ecs.ECS) {
 	if player.SpeedY != 0 {
 		jump(animations, player)
 
+		animations.PauseAtStart(component.PlayerRunningLandingAnimation)
+
 		return
 	}
 
@@ -87,7 +89,12 @@ func move(animations *component.AnimationData, player *component.PlayerData) {
 		}
 
 		if player.JustStoppedRunning {
+			animations.PauseAtStart(component.PlayerRunAnimation)
 			animations.PauseAtStart(component.PlayerStopRunAnimation)
+		}
+
+		if player.JustLanded {
+			animations.ActivateAndResume(component.PlayerRunningLandingAnimation)
 		}
 	} else {
 		animations.ActivateAndResume(component.PlayerWalkAnimation)

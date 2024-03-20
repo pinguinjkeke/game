@@ -20,13 +20,15 @@ const (
 	PlayerFallAnimation
 	PlayerRunningJumpAnimation
 	PlayerRunningFallAnimation
+	PlayerRunningLandingAnimation
 )
 
 type PlayerData struct {
 	Ground             *resolv.Object
 	Jumping            bool
-	DoubleJumping      bool
-	MovingDirection    float64
+	JustLanded         bool
+	LandDistance       float64
+	MovingDirection    int
 	Running            bool
 	JustStoppedRunning bool
 	SpeedX             float64

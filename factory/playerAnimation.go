@@ -14,21 +14,58 @@ func CreatePlayerAnimation(ecs *ecs.ECS) {
 	timerEntry := component.Timer.MustFirst(ecs.World)
 	timer := component.Timer.Get(timerEntry)
 
-	g32 := ganim8.NewGrid(component.PlayerFrameWidth, component.PlayerFrameHeight, component.PlayerFrameWidth*16, component.PlayerFrameHeight*11)
-	animationDuration := component.PlayerAnimationTickMs * time.Millisecond
+	g32 := ganim8.NewGrid(component.PlayerFrameWidth, component.PlayerFrameHeight, component.PlayerFrameWidth*16, component.PlayerFrameHeight*13)
 	animations := []*ganim8.Animation{
-		component.PlayerStandingAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("1-16", 8, "1-16", 9, "1-16", 10, "1-2", 11), 150*time.Millisecond),
-		component.PlayerWalkAnimation:     ganim8.New(assets.PlayerSprite, g32.Frames("1-8", 1), animationDuration),
-		component.PlayerRunAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("1-9", 2), animationDuration, func(anim *ganim8.Animation, loops int) {
-			if loops > 0 {
-				anim.GoToFrame(3)
-			}
-		}),
-		component.PlayerStopRunAnimation:     ganim8.New(assets.PlayerSprite, g32.Frames("10-15", 2), 80*time.Millisecond),
-		component.PlayerJumpAnimation:        ganim8.New(assets.PlayerSprite, g32.Frames("1-3", 3), 80*time.Millisecond),
-		component.PlayerFallAnimation:        ganim8.New(assets.PlayerSprite, g32.Frames("4-6", 3), 100*time.Millisecond),
-		component.PlayerRunningJumpAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("1-3", 4), 80*time.Millisecond),
-		component.PlayerRunningFallAnimation: ganim8.New(assets.PlayerSprite, g32.Frames("4-5", 4), 100*time.Millisecond),
+		component.PlayerStandingAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("1-16", 8, "1-16", 9, "1-16", 10, "1-16", 11, "1-16", 12, "1-6", 13),
+			150*time.Millisecond,
+		),
+		component.PlayerWalkAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("1-8", 1),
+			component.PlayerAnimationTickMs*time.Millisecond,
+		),
+		component.PlayerRunAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("1-9", 2),
+			component.PlayerAnimationTickMs*time.Millisecond,
+			func(anim *ganim8.Animation, loops int) {
+				if loops > 0 {
+					anim.GoToFrame(3)
+				}
+			},
+		),
+		component.PlayerStopRunAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("10-15", 2),
+			80*time.Millisecond,
+		),
+		component.PlayerJumpAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("1-3", 3),
+			80*time.Millisecond,
+		),
+		component.PlayerFallAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("4-6", 3),
+			100*time.Millisecond,
+		),
+		component.PlayerRunningJumpAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("1-3", 4),
+			80*time.Millisecond,
+		),
+		component.PlayerRunningFallAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("4", 4),
+			100*time.Millisecond,
+		),
+		component.PlayerRunningLandingAnimation: ganim8.New(
+			assets.PlayerSprite,
+			g32.Frames("5-13", 4),
+			100*time.Millisecond,
+		),
 	}
 
 	for _, animation := range animations {

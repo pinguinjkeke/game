@@ -1,6 +1,7 @@
 package system
 
 import (
+	"fmt"
 	"game/component"
 	"game/controls"
 	"game/physics"
@@ -21,17 +22,24 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 
 	if playerControls.ActionIsPressed(controls.Run) {
 		player.Running = true
+
 		acceleration = physics.RunningAcceleration
 	}
 
+	movingDirection := 1
+
 	if playerControls.ActionIsPressed(controls.MoveLeft) {
 		player.SpeedX -= acceleration
-		player.MovingDirection = -1
+		movingDirection = -1
 	}
 
 	if playerControls.ActionIsPressed(controls.MoveRight) {
 		player.SpeedX += acceleration
-		player.MovingDirection = 1
+	}
+
+	if player.MovingDirection != movingDirection {
+		player.MovingDirection = movingDirection
+		player.JustLanded = false
 	}
 
 	if player.SpeedX > physics.Friction {
@@ -42,11 +50,20 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 		player.SpeedX = 0
 	}
 
-	if !player.Running && math.Abs(player.SpeedX) > physics.MaxWalkingSpeed {
-		maxSpeed = math.Max(math.Abs(player.SpeedX)-(physics.MaxRunningSpeed-physics.MaxWalkingSpeed)/4, physics.MaxWalkingSpeed)
+	if player.Running {
+		if player.Jumping {
+			maxSpeed += physics.XSpeedDiff * 2
+		}
+
+		if player.JustLanded {
+			maxSpeed += physics.XSpeedDiff
+		}
+	} else if math.Abs(player.SpeedX) > physics.MaxWalkingSpeed {
+		maxSpeed = math.Max(math.Abs(player.SpeedX)-physics.XSpeedDiff/4, physics.MaxWalkingSpeed)
 	}
 
 	player.SpeedX = math.Max(math.Min(player.SpeedX, maxSpeed), -maxSpeed)
+	fmt.Println(player.SpeedX)
 
 	dx := player.SpeedX
 
@@ -56,4 +73,8 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 	}
 
 	playerObject.Position.X += dx
+
+	if player.JustLanded {
+		player.LandDistance += dx
+	}
 }

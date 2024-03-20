@@ -15,6 +15,8 @@ const (
 	RunningAcceleration      = 1.5
 	MaxWalkingSpeed          = 1.5
 	MaxRunningSpeed          = 4.0
+	XSpeedDiff               = MaxRunningSpeed - MaxWalkingSpeed
+	LandingDistance          = 280.0
 	JumpSpeed                = 10.0
 	Gravity                  = 0.75
 	TopPlatformSlideDistance = 8

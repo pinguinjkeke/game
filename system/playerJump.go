@@ -18,13 +18,21 @@ func playerJump(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 	playerControls := component.ControlsHandler.Get(playerEntry)
 
 	player.SpeedY += physics.Gravity
+	player.JustLanded = player.Running && player.JustLanded && math.Abs(player.LandDistance) < physics.LandingDistance
 
-	if !player.DoubleJumping && playerControls.ActionIsJustPressed(controls.Jump) && (player.Jumping || player.Ground != nil) {
+	if !player.Jumping && playerControls.ActionIsJustPressed(controls.Jump) && (player.Jumping || player.Ground != nil) {
 		player.SpeedY = -physics.JumpSpeed
+		jumpSpeedX := physics.XSpeedDiff
 
-		if player.Jumping {
-			player.DoubleJumping = true
+		if player.Running {
+			jumpSpeedX *= 2
 		}
+
+		if player.SpeedX < 0 {
+			jumpSpeedX *= -1
+		}
+
+		player.SpeedX += jumpSpeedX
 
 		player.Jumping = true
 	}
@@ -46,8 +54,12 @@ func playerJump(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 	}
 
 	if player.Ground != nil {
+		if player.Jumping {
+			player.JustLanded = true
+			player.LandDistance = 0.0
+		}
+
 		player.Jumping = false
-		player.DoubleJumping = false
 	}
 
 	playerObject.Position.Y += dy
