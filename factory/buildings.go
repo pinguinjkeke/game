@@ -52,16 +52,33 @@ var lightsOffColors = []color.Color{
 	color.RGBA{R: 0x41, G: 0x4A, B: 0x52, A: 0xff},
 	color.RGBA{R: 0x30, G: 0x3A, B: 0x43, A: 0xff},
 }
-var lampSprite *ebiten.Image
+var lampSprite = func() *ebiten.Image {
+	sprite := ebiten.NewImage(4, 4)
+	sprite.Fill(color.RGBA{R: 0xA3, G: 0x6C, B: 0x7B, A: 0xaa})
 
-var antennaSprite *ebiten.Image
+	return sprite
+}()
+
+var antennaSprite = func() *ebiten.Image {
+	sprite := ebiten.NewImage(5, 30)
+	sprite.DrawImage(lampSprite, &ebiten.DrawImageOptions{})
+	vector.DrawFilledRect(
+		sprite,
+		float32(1.5),
+		float32(4),
+		float32(1),
+		float32(25),
+		buildingColors[1],
+		false,
+	)
+
+	return sprite
+}()
 
 func CreateBuildings(ecs *ecs.ECS) {
 	cameraEntry := component.Camera.MustFirst(ecs.World)
 	camera := component.Camera.Get(cameraEntry)
 	backgroundWidth := camera.Surface.Bounds().Dx() * 2
-
-	initSprites()
 
 	layers := []*ebiten.Image{
 		ebiten.NewImage(backgroundWidth, renderer.BackgroundSize),
@@ -221,23 +238,4 @@ func addLights(image *ebiten.Image) (newImage *ebiten.Image, oX float64) {
 	}
 
 	return newImage, oX
-}
-
-func initSprites() {
-	if antennaSprite != nil && lampSprite != nil {
-		return
-	}
-
-	antennaSprite, lampSprite = ebiten.NewImage(5, 30), ebiten.NewImage(5, 5)
-	lampSprite.Fill(color.RGBA{R: 0xA3, G: 0x6C, B: 0x7B, A: 0xaa})
-	antennaSprite.DrawImage(lampSprite, &ebiten.DrawImageOptions{})
-	vector.DrawFilledRect(
-		antennaSprite,
-		float32(2),
-		float32(5),
-		float32(1),
-		float32(25),
-		buildingColors[1],
-		false,
-	)
 }
