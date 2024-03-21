@@ -36,6 +36,7 @@ func renderMoon(ecs *ecs.ECS, image *ebiten.Image, camera *camera.Camera) {
 	sky := component.Sky.Get(skyEntry)
 
 	options := &ebiten.DrawImageOptions{}
+	options.Filter = ebiten.FilterLinear
 	options.GeoM.Scale(0.5, 0.5)
 	options.GeoM.Translate(float64(sky.MoonX), float64(sky.MoonY))
 
@@ -47,6 +48,7 @@ func renderBuildings(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camer
 	buildings := component.Buildings.Get(buildingsEntry)
 
 	options := &ebiten.DrawImageOptions{}
+	options.Filter = ebiten.FilterLinear
 	options.GeoM.Translate(-camera.X*0.1, 0)
 	layers[0].DrawImage(buildings.Layers[0], options)
 	options.GeoM.Translate(-camera.X*0.02, 0)
@@ -58,6 +60,7 @@ func renderClouds(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camera) 
 	sky := component.Sky.Get(skyEntry)
 
 	options := &ebiten.DrawImageOptions{}
+	options.Filter = ebiten.FilterLinear
 	options.GeoM.Translate(camera.X*0.03, 0)
 	layers[0].DrawImage(sky.Layers[0], options)
 	options.GeoM.Translate(camera.X*0.01, 0)

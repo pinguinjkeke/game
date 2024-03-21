@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"game/component"
 	"game/controls"
 	"game/physics"
@@ -63,7 +62,6 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 	}
 
 	player.SpeedX = math.Max(math.Min(player.SpeedX, maxSpeed), -maxSpeed)
-	fmt.Println(player.SpeedX)
 
 	dx := player.SpeedX
 
