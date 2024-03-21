@@ -25,6 +25,12 @@ func (a *AnimationData) ActivateAndResume(animation int) *ganim8.Animation {
 	return a.Animations[animation]
 }
 
+func (a *AnimationData) Reset(animations ...int) {
+	for _, animation := range animations {
+		a.Animations[animation].GoToFrame(1)
+	}
+}
+
 func (a *AnimationData) Resume(animations ...int) {
 	for _, animation := range animations {
 		a.Animations[animation].Resume()

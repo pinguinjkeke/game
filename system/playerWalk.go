@@ -18,6 +18,7 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 
 	player.Running = false
 	player.JustStoppedRunning = playerControls.ActionIsJustReleased(controls.Run)
+	player.JustChangedMovingDirection = false
 
 	if playerControls.ActionIsPressed(controls.Run) {
 		player.Running = true
@@ -25,7 +26,7 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 		acceleration = physics.RunningAcceleration
 	}
 
-	movingDirection := 1
+	movingDirection := 0
 
 	if playerControls.ActionIsPressed(controls.MoveLeft) {
 		player.SpeedX -= acceleration
@@ -34,11 +35,14 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 
 	if playerControls.ActionIsPressed(controls.MoveRight) {
 		player.SpeedX += acceleration
+		movingDirection = 1
 	}
 
-	if player.MovingDirection != movingDirection {
+	if movingDirection != 0 && player.MovingDirection != movingDirection {
 		player.MovingDirection = movingDirection
 		player.JustLanded = false
+		player.JustChangedMovingDirection = true
+		player.Running = false
 	}
 
 	if player.SpeedX > physics.Friction {

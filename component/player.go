@@ -24,15 +24,16 @@ const (
 )
 
 type PlayerData struct {
-	Ground             *resolv.Object
-	Jumping            bool
-	JustLanded         bool
-	LandDistance       float64
-	MovingDirection    int
-	Running            bool
-	JustStoppedRunning bool
-	SpeedX             float64
-	SpeedY             float64
+	Ground                     *resolv.Object
+	Jumping                    bool
+	JustLanded                 bool
+	LandDistance               float64
+	MovingDirection            int
+	JustChangedMovingDirection bool
+	Running                    bool
+	JustStoppedRunning         bool
+	SpeedX                     float64
+	SpeedY                     float64
 }
 
 var Player = donburi.NewComponentType[PlayerData]()

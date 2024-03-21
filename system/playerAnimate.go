@@ -81,6 +81,10 @@ func move(animations *component.AnimationData, player *component.PlayerData) {
 
 	speed := math.Abs(player.SpeedX)
 
+	if player.JustChangedMovingDirection {
+		animations.Reset(component.PlayerRunAnimation)
+	}
+
 	if speed > physics.MaxWalkingSpeed {
 		animations.ActivateAndResume(component.PlayerRunAnimation)
 
