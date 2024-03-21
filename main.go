@@ -57,7 +57,6 @@ func main() {
 
 	ecs.AddSystem(system.UpdateTimer)
 	ecs.AddSystem(system.UpdateSpace)
-	ecs.AddSystem(system.UpdateBuildings)
 	ecs.AddSystem(system.UpdatePlayer)
 	ecs.AddSystem(system.UpdatePlayerAnimation)
 	ecs.AddSystem(system.UpdateCamera)

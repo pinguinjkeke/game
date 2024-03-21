@@ -31,21 +31,29 @@ type buildingData struct {
 	WindowWidth int
 }
 
+type buildingWindowData struct {
+	X      int
+	Y      int
+	Width  int
+	Layer  int
+	Lights bool
+}
+
 var buildingColors = []color.Color{
 	color.RGBA{R: 0x30, G: 0x3A, B: 0x43, A: 0xff},
 	color.RGBA{R: 0x23, G: 0x2E, B: 0x32, A: 0xff},
 }
-
 var lightsOnColors = []color.Color{
 	color.RGBA{R: 0xB2, G: 0x9F, B: 0x8A, A: 0xff},
 	color.RGBA{R: 0xB2, G: 0xB5, B: 0xB7, A: 0xff},
 }
+
 var lightsOffColors = []color.Color{
 	color.RGBA{R: 0x41, G: 0x4A, B: 0x52, A: 0xff},
 	color.RGBA{R: 0x30, G: 0x3A, B: 0x43, A: 0xff},
 }
-
 var lampSprite *ebiten.Image
+
 var antennaSprite *ebiten.Image
 
 func CreateBuildings(ecs *ecs.ECS) {
@@ -62,30 +70,27 @@ func CreateBuildings(ecs *ecs.ECS) {
 
 	buildingsEntry := archetype.Buildings.Spawn(ecs)
 	offset := 0.0
-	windows := make([]*component.BuildingWindowData, 0, 100)
 
 	for offset < float64(backgroundWidth) {
 		building, buildingWindows := createBuilding(offset)
-		windows = append(windows, buildingWindows...)
 
 		options := &ebiten.DrawImageOptions{}
 		options.GeoM.Translate(building.X, float64(renderer.BackgroundSize-building.Sprite.Bounds().Dy()))
 		layers[building.Layer].DrawImage(building.Sprite, options)
 
+		for _, window := range buildingWindows {
+			renderWindow(window, layers)
+		}
+
 		offset += float64(buildingMarginX*(rand.Intn(8)-3)) + float64(building.Sprite.Bounds().Dx())
 	}
 
-	for _, window := range windows {
-		RenderWindow(window, layers)
-	}
-
 	component.Buildings.Set(buildingsEntry, &component.BuildingsData{
-		Layers:  layers,
-		Windows: windows,
+		Layers: layers,
 	})
 }
 
-func createBuilding(positionX float64) (building *buildingData, windows []*component.BuildingWindowData) {
+func createBuilding(positionX float64) (building *buildingData, windows []*buildingWindowData) {
 	doubledWindow := rand.Intn(4) == 1
 	windowWidth, buildingMarginX := windowSize, windowOffset
 	windowRows := minWindows + rand.Intn(5)
@@ -106,7 +111,7 @@ func createBuilding(positionX float64) (building *buildingData, windows []*compo
 
 	sprite, oX := addLights(buildingSprite)
 
-	windows = make([]*component.BuildingWindowData, 0, 20)
+	windows = make([]*buildingWindowData, 0, 20)
 	x := buildingMarginX
 	for x < width {
 		y := buildingPaddingY
@@ -117,7 +122,7 @@ func createBuilding(positionX float64) (building *buildingData, windows []*compo
 			}
 
 			for j := 0; j < windowColumns; j++ {
-				windows = append(windows, &component.BuildingWindowData{
+				windows = append(windows, &buildingWindowData{
 					X:      int(positionX+oX) + x,
 					Y:      renderer.BackgroundSize - height + y,
 					Layer:  layer,
@@ -144,7 +149,7 @@ func createBuilding(positionX float64) (building *buildingData, windows []*compo
 	return buildingData, windows
 }
 
-func RenderWindow(window *component.BuildingWindowData, layers []*ebiten.Image) {
+func renderWindow(window *buildingWindowData, layers []*ebiten.Image) {
 	color := lightsOnColors[window.Layer]
 
 	if !window.Lights {
