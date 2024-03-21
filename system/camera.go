@@ -11,5 +11,5 @@ func UpdateCamera(ecs *ecs.ECS) {
 	playerEntry := component.Player.MustFirst(ecs.World)
 	playerObject := component.Object.Get(playerEntry)
 
-	camera.SetPosition(playerObject.Position.X, 320)
+	camera.SetPosition(playerObject.Position.X, 370)
 }

@@ -20,6 +20,13 @@ func CreateRoad(ecs *ecs.ECS) {
 
 	cameraEntry := component.Camera.MustFirst(ecs.World)
 	camera := component.Camera.Get(cameraEntry)
+
+	drains := make([]float64, 4)
+
+	for i, _ := range drains {
+		drains[i] = float64(i * camera.Width / 2)
+	}
+
 	marksCount := camera.Surface.Bounds().Dx() / markWidth
 	marks := make([]float64, marksCount)
 
@@ -27,13 +34,22 @@ func CreateRoad(ecs *ecs.ECS) {
 		marks[i] = float64(camera.Width*i) / 2
 	}
 
-	image := ebiten.NewImage(markWidth, markHeight)
-	image.Fill(markColor)
+	marksImage := ebiten.NewImage(markWidth, markHeight)
+	marksImage.Fill(markColor)
+
+	sewers := make([]float64, 4)
+	for i, _ := range sewers {
+		sewers[i] = float64(i*camera.Width/2 + camera.Width/4)
+	}
 
 	component.Road.Set(roadEntry, &component.RoadData{
+		DrainsX:    drains,
+		DrainsY:    118,
 		MarksX:     marks,
 		MarkWidth:  160,
 		MarkHeight: markHeight,
-		MarksImage: image,
+		MarksImage: marksImage,
+		SewersX:    sewers,
+		SewersY:    90,
 	})
 }
