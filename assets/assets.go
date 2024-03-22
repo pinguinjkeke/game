@@ -22,15 +22,18 @@ var Music_mp3 []byte
 var ScoreFont = mustLoadFont("font.ttf")
 
 var PlayerSprite = mustLoadImage("player.png")
-var CloudsSprite = mustLoadImage("clouds.png")
-var MoonSprite = mustLoadImage("moon.png")
-var SkySprite = mustLoadImage("sky.png")
-var CraneSprite = mustLoadImage("crane.png")
-var DrainSprite = mustLoadImage("drain.png")
-var RoadSprite = mustLoadImage("road.png")
-var SewerSprite = mustLoadImage("sewer.png")
-var EnemySprite = mustLoadImage("enemy.png")
-var WorldSprite = mustLoadImage("floor.png")
+
+var CloudsSprite = mustLoadImage("background/clouds.png")
+var MoonSprite = mustLoadImage("background/moon.png")
+var SkySprite = mustLoadImage("background/sky.png")
+var CraneSprite = mustLoadImage("background/crane.png")
+
+var BustStopSprite = mustLoadImage("objects/bus_stop.png")
+var RvSprite = mustLoadImage("objects/rv.png")
+
+var DrainSprite = mustLoadImage("road/drain.png")
+var RoadSprite = mustLoadImage("road/road.png")
+var SewerSprite = mustLoadImage("road/sewer.png")
 
 func mustLoadImage(name string) *ebiten.Image {
 	f, err := assets.Open(name)

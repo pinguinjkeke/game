@@ -66,6 +66,7 @@ func main() {
 	ecs.AddRenderer(layers.Background, renderer.RenderRoad)
 	ecs.AddRenderer(layers.Game, renderer.RenderWall)
 	ecs.AddRenderer(layers.Game, renderer.RenderPlayer)
+	ecs.AddRenderer(layers.Game, renderer.RenderTerrain)
 
 	factory.CreateCamera(ecs, WindowWidth, WindowHeight)
 
@@ -81,6 +82,7 @@ func main() {
 		factory.CreateWall(ecs, 0, 0, LevelWidth, WallThickness),
 		factory.CreateWall(ecs, 0, LevelHeight-WallThickness*4, LevelWidth, WallThickness*4),
 		factory.CreatePlayer(ecs, WindowWidth/2, LevelHeight/2),
+		factory.CreateTerrain(ecs, factory.ObjectTypeRv, float64(WindowWidth)-100, 400),
 	)
 
 	factory.CreatePlayerAnimation(ecs)
