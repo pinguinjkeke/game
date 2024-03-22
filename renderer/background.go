@@ -23,8 +23,8 @@ func RenderBackground(ecs *ecs.ECS, screen *ebiten.Image) {
 	options.GeoM.Scale(float64(camera.Surface.Bounds().Dx()), 1)
 	layers[0].DrawImage(assets.SkySprite, options)
 	renderMoon(ecs, layers[0], camera)
+	renderClouds(ecs, layers)
 	renderBuildings(ecs, layers, camera)
-	renderClouds(ecs, layers, camera)
 
 	for _, layer := range layers {
 		camera.Surface.DrawImage(layer, &ebiten.DrawImageOptions{})
@@ -55,14 +55,20 @@ func renderBuildings(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camer
 	layers[1].DrawImage(buildings.Layers[1], options)
 }
 
-func renderClouds(ecs *ecs.ECS, layers [2]*ebiten.Image, camera *camera.Camera) {
+func renderClouds(ecs *ecs.ECS, layers [2]*ebiten.Image) {
 	skyEntry := component.Sky.MustFirst(ecs.World)
 	sky := component.Sky.Get(skyEntry)
 
 	options := &ebiten.DrawImageOptions{}
 	options.Filter = ebiten.FilterLinear
-	options.GeoM.Translate(camera.X*0.03, 0)
+	options.GeoM.Translate(sky.X0, 0)
 	layers[0].DrawImage(sky.Layers[0], options)
-	options.GeoM.Translate(camera.X*0.01, 0)
+	options.GeoM.Translate(sky.LayerWidth, 0)
+	layers[0].DrawImage(sky.Layers[0], options)
+
+	options.GeoM.Reset()
+	options.GeoM.Translate(sky.X1, 0)
+	layers[1].DrawImage(sky.Layers[1], options)
+	options.GeoM.Translate(sky.LayerWidth, 0)
 	layers[1].DrawImage(sky.Layers[1], options)
 }

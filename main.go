@@ -60,6 +60,7 @@ func main() {
 	ecs.AddSystem(system.UpdatePlayer)
 	ecs.AddSystem(system.UpdatePlayerAnimation)
 	ecs.AddSystem(system.UpdateCamera)
+	ecs.AddSystem(system.UpdateSky)
 
 	ecs.AddRenderer(layers.Background, renderer.RenderBackground)
 	ecs.AddRenderer(layers.Background, renderer.RenderRoad)
