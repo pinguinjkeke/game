@@ -12,7 +12,7 @@ func CreatePlayer(ecs *ecs.ECS, x, y float64) *donburi.Entry {
 	controlsEntry := component.Controls.MustFirst(ecs.World)
 	controls := component.Controls.Get(controlsEntry)
 
-	object := resolv.NewObject(x, y, component.PlayerFrameWidth/3, component.PlayerFrameHeight)
+	object := resolv.NewObject(x, y, component.PlayerWidth, component.PlayerFrameHeight)
 	object.SetShape(resolv.NewRectangle(0, 0, object.Size.X, object.Size.Y))
 
 	playerEntry := archetype.Player.Spawn(ecs)

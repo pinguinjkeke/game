@@ -8,6 +8,7 @@ import (
 const (
 	PlayerFrameHeight     = 64
 	PlayerFrameWidth      = 64
+	PlayerWidth           = 22
 	PlayerAnimationTickMs = 140
 )
 

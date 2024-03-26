@@ -45,7 +45,7 @@ func playerJump(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 		checkDistance++
 	}
 
-	if collision := playerObject.Check(0, checkDistance, physics.TagSolid); collision != nil {
+	if collision := playerObject.Check(0, checkDistance, physics.TagSolid, physics.TagTerrain); collision != nil {
 		if dy < 0 {
 			slideOverTopPlatform(playerObject, collision)
 		} else {
@@ -82,14 +82,22 @@ func contactGround(
 ) {
 	solids := collision.ObjectsByTags(physics.TagSolid)
 
-	if len(solids) == 0 || (player.Ground != nil && player.Ground.Position.Y < solids[0].Position.Y) {
-		return
+	if len(solids) != 0 && (player.Ground == nil || player.Ground.Position.Y > solids[0].Position.Y) {
+		*dy = collision.ContactWithObject(solids[0]).Y
+		player.SpeedY = 0
+
+		if solids[0].Position.Y > playerObject.Position.Y {
+			player.Ground = solids[0]
+
+			return
+		}
 	}
 
-	*dy = collision.ContactWithObject(solids[0]).Y
-	player.SpeedY = 0
-
-	if solids[0].Position.Y > playerObject.Position.Y {
-		player.Ground = solids[0]
+	if terrains := collision.ObjectsByTags(physics.TagTerrain); len(terrains) > 0 {
+		if contactSet := playerObject.Shape.Intersection(player.SpeedX, 2, terrains[0].Shape); contactSet != nil {
+			player.Ground = terrains[0]
+			player.SpeedY = 0
+			*dy = contactSet.TopmostPoint().Y - playerObject.Bottom() + 0.1
+		}
 	}
 }

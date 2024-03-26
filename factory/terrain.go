@@ -18,39 +18,45 @@ const (
 )
 
 type object struct {
-	startX   int
-	startY   int
+	startX   float64
+	startY   float64
+	width    float64
+	height   float64
 	vertices []float64
 	sprite   *ebiten.Image
+	tag      string
 }
 
 var objects = [...]object{
 	ObjectTypeRv: object{
-		startX: 0,
-		startY: 0,
+		startX: 18,
+		startY: 2,
+		width:  102,
+		height: 64,
 		vertices: []float64{
-			0, 59,
-			116, 59,
-			116, 0,
-			15, 0,
-			9, 26,
-			5, 26,
-			1, 30,
+			0, 1,
+			112, 1,
+			112, 65,
+			0, 65,
 		},
 		sprite: assets.RvSprite,
+		tag:    physics.TagSolid,
 	},
 }
 
 func CreateTerrain(ecs *ecs.ECS, objectType int, x, y float64) *donburi.Entry {
 	terrainEntry := archetype.Terrain.Spawn(ecs)
 
-	sprite := objects[objectType].sprite
+	object := objects[objectType]
+	sprite := object.sprite
 
-	object := resolv.NewObject(x, y, float64(sprite.Bounds().Dx()), float64(sprite.Bounds().Dy()), physics.TagSolid)
-	object.SetShape(resolv.NewConvexPolygon(0, 0, objects[objectType].vertices...))
+	resolvObject := resolv.NewObject(x, y, object.width, object.height, object.tag)
+	resolvObject.SetShape(resolv.NewConvexPolygon(x, y, object.vertices...))
 
-	component.Object.Set(terrainEntry, object)
+	component.Object.Set(terrainEntry, resolvObject)
 	component.Terrain.Set(terrainEntry, &component.TerrainData{
+		StartX: object.startX,
+		StartY: object.startY,
 		Sprite: sprite,
 	})
 

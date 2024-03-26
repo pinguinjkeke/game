@@ -69,7 +69,7 @@ func playerWalk(ecs *ecs.ECS, playerEntry *donburi.Entry) {
 
 	dx := player.SpeedX
 
-	if check := playerObject.Check(dx, 0, physics.TagSolid); check != nil {
+	if check := playerObject.Check(dx, 0, physics.TagSolid, physics.TagTerrain); check != nil {
 		dx = check.ContactWithCell(check.Cells[0]).X
 		player.SpeedX = 0
 	}

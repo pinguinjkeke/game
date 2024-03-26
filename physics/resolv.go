@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	TagSolid = "solid"
+	TagSolid   = "solid"
+	TagTerrain = "terrain"
 )
 
 const (

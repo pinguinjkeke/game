@@ -6,6 +6,8 @@ import (
 )
 
 type TerrainData struct {
+	StartX float64
+	StartY float64
 	Sprite *ebiten.Image
 }
 
