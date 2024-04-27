@@ -1,10 +1,5 @@
 package physics
 
-import (
-	"game/component"
-	"github.com/yohamta/donburi"
-)
-
 const (
 	TagSolid   = "solid"
 	TagTerrain = "terrain"
@@ -22,11 +17,3 @@ const (
 	Gravity                  = 0.75
 	TopPlatformSlideDistance = 8
 )
-
-func Add(space *donburi.Entry, objects ...*donburi.Entry) {
-	for _, obj := range objects {
-		object := component.Object.Get(obj)
-
-		component.Space.Get(space).Space.Add(object)
-	}
-}

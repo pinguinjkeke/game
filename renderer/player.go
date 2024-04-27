@@ -11,7 +11,7 @@ func RenderPlayer(ecs *ecs.ECS, screen *ebiten.Image) {
 	playerEntry := component.Player.MustFirst(ecs.World)
 	player := component.Player.Get(playerEntry)
 	animations := component.Animation.Get(playerEntry)
-	object := component.Object.Get(playerEntry)
+	shape := component.Shape.Get(playerEntry)
 	cameraEntry := component.Camera.MustFirst(ecs.World)
 	camera := component.Camera.Get(cameraEntry)
 
@@ -33,6 +33,7 @@ func RenderPlayer(ecs *ecs.ECS, screen *ebiten.Image) {
 	animations.GetActive().Draw(playerImage, animationOptions)
 
 	imageOptions := &ebiten.DrawImageOptions{}
-	camera.GetTranslation(imageOptions, object.Position.X-object.Size.X, object.Position.Y)
+	position := shape.Body().Position()
+	camera.GetTranslation(imageOptions, position.X, position.Y)
 	screen.DrawImage(playerImage, imageOptions)
 }

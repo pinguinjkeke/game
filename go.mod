@@ -4,10 +4,10 @@ go 1.21.6
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.6.6
+	github.com/jakecoffman/cp/v2 v2.0.2
 	github.com/melonfunction/ebiten-camera v0.0.0-20220812153034-695003d18a6d
 	github.com/quasilyte/ebitengine-input v0.9.1
 	github.com/solarlune/ebitick v0.0.0-20231009060637-bfc6d0d21b9b
-	github.com/solarlune/resolv v0.7.0
 	github.com/yohamta/donburi v1.3.13
 	github.com/yohamta/ganim8/v2 v2.1.29
 	golang.org/x/image v0.12.0

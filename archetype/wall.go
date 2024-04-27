@@ -7,5 +7,5 @@ import (
 
 var Wall = newArchetype(
 	tags.Wall,
-	component.Object,
+	component.Shape,
 )

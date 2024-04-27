@@ -8,7 +8,7 @@ import (
 var Player = newArchetype(
 	tags.Player,
 	component.Animation,
-	component.Object,
+	component.Shape,
 	component.ControlsHandler,
 	component.Player,
 )

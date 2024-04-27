@@ -3,6 +3,7 @@ package system
 import (
 	"game/component"
 	"game/physics"
+	"github.com/jakecoffman/cp/v2"
 	"github.com/solarlune/ebitick"
 	"github.com/yohamta/donburi/ecs"
 	"math"
@@ -12,17 +13,20 @@ import (
 func UpdatePlayerAnimation(ecs *ecs.ECS) {
 	playerEntry := component.Player.MustFirst(ecs.World)
 	player := component.Player.Get(playerEntry)
-	animations := component.Animation.Get(playerEntry)
 
 	timerEntry := component.Timer.MustFirst(ecs.World)
 	timer := component.Timer.Get(timerEntry)
 
+	playerShape := component.Shape.Get(playerEntry)
+	velocity := playerShape.Shape.Body().Velocity()
+
+	animations := component.Animation.Get(playerEntry)
 	animations.GetActive().Update()
 
-	speed := math.Abs(player.SpeedX)
+	velocityX := math.Abs(velocity.X)
 
-	if player.SpeedY != 0 {
-		jump(animations, player)
+	if !player.Grounded && velocity.Y != 0 {
+		jump(animations, velocity)
 
 		animations.PauseAtStart(component.PlayerRunningLandingAnimation)
 
@@ -36,18 +40,18 @@ func UpdatePlayerAnimation(ecs *ecs.ECS) {
 		component.PlayerRunningFallAnimation,
 	)
 
-	if speed != 0 {
-		move(animations, player)
+	if velocityX != 0 {
+		move(animations, player, velocity)
 	} else {
 		stand(animations, timer)
 	}
 }
 
-func jump(animations *component.AnimationData, player *component.PlayerData) {
+func jump(animations *component.AnimationData, velocity cp.Vector) {
 	animations.CancelStandingTimer()
-	running := math.Abs(player.SpeedX) > physics.MaxWalkingSpeed
+	running := math.Abs(velocity.X) > physics.MaxWalkingSpeed
 
-	if player.SpeedY < 0 {
+	if velocity.Y < 0 {
 		animations.Resume(component.PlayerJumpAnimation, component.PlayerRunningJumpAnimation)
 		animations.Active = component.PlayerJumpAnimation
 
@@ -76,10 +80,10 @@ func stand(animations *component.AnimationData, timer *ebitick.TimerSystem) {
 	}
 }
 
-func move(animations *component.AnimationData, player *component.PlayerData) {
+func move(animations *component.AnimationData, player *component.PlayerData, velocity cp.Vector) {
 	animations.CancelStandingTimer()
 
-	speed := math.Abs(player.SpeedX)
+	speed := math.Abs(velocity.X)
 
 	if player.JustChangedMovingDirection {
 		animations.Reset(component.PlayerRunAnimation)

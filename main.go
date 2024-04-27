@@ -4,7 +4,6 @@ import (
 	"game/component"
 	"game/factory"
 	"game/layers"
-	"game/physics"
 	"game/renderer"
 	"game/system"
 	"github.com/yohamta/donburi/ecs"
@@ -64,26 +63,21 @@ func main() {
 
 	ecs.AddRenderer(layers.Background, renderer.RenderBackground)
 	ecs.AddRenderer(layers.Background, renderer.RenderRoad)
-	ecs.AddRenderer(layers.Game, renderer.RenderWall)
 	ecs.AddRenderer(layers.Game, renderer.RenderPlayer)
 	ecs.AddRenderer(layers.Game, renderer.RenderTerrain)
 
 	factory.CreateCamera(ecs, WindowWidth, WindowHeight)
 
 	factory.CreateControls(ecs)
-	space := factory.CreateSpace(ecs, LevelWidth, LevelHeight)
-
 	factory.CreateTimer(ecs)
 
-	physics.Add(
-		space,
-		factory.CreateWall(ecs, 0, 0, WallThickness, LevelHeight),
-		factory.CreateWall(ecs, LevelWidth-WallThickness, 0, WallThickness, LevelHeight),
-		factory.CreateWall(ecs, 0, 0, LevelWidth, WallThickness),
-		factory.CreateWall(ecs, 0, LevelHeight-WallThickness*4, LevelWidth, WallThickness*4),
-		factory.CreatePlayer(ecs, WindowWidth/2, LevelHeight/2),
-		factory.CreateTerrain(ecs, factory.ObjectTypeRv, float64(WindowWidth)-100, 400),
-	)
+	factory.CreateSpace(ecs, LevelWidth, LevelHeight)
+	factory.CreateWall(ecs, 0, 0, 0, LevelHeight)
+	factory.CreateWall(ecs, LevelWidth, 0, 0, LevelHeight)
+	factory.CreateWall(ecs, 0, 0, LevelWidth, 0)
+	factory.CreateWall(ecs, 0, LevelHeight, LevelWidth, 0)
+	factory.CreatePlayer(ecs, WindowWidth/2, LevelHeight/2)
+	//factory.CreateTerrain(ecs, factory.ObjectTypeRv, float64(WindowWidth)-100, 400)
 
 	factory.CreatePlayerAnimation(ecs)
 

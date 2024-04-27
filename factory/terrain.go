@@ -6,7 +6,7 @@ import (
 	"game/component"
 	"game/physics"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/solarlune/resolv"
+	"github.com/jakecoffman/cp/v2"
 	"github.com/yohamta/donburi"
 	"github.com/yohamta/donburi/ecs"
 )
@@ -50,10 +50,23 @@ func CreateTerrain(ecs *ecs.ECS, objectType int, x, y float64) *donburi.Entry {
 	object := objects[objectType]
 	sprite := object.sprite
 
-	resolvObject := resolv.NewObject(x, y, object.width, object.height, object.tag)
-	resolvObject.SetShape(resolv.NewConvexPolygon(x, y, object.vertices...))
+	spaceEntry := component.Space.MustFirst(ecs.World)
+	space := component.Space.Get(spaceEntry)
 
-	component.Object.Set(terrainEntry, resolvObject)
+	shape := space.Space.AddShape(cp.NewSegment(
+		space.Space.StaticBody,
+		cp.Vector{X: x, Y: y},
+		cp.Vector{X: x + object.width, Y: y + object.height},
+		0,
+	))
+	shape.SetFriction(1)
+	shape.SetElasticity(1)
+
+	component.Shape.Set(terrainEntry, &component.ShapeData{
+		Shape:  shape,
+		Width:  object.width,
+		Height: object.height,
+	})
 	component.Terrain.Set(terrainEntry, &component.TerrainData{
 		StartX: object.startX,
 		StartY: object.startY,
